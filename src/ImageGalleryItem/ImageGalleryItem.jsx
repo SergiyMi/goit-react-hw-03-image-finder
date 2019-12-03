@@ -2,12 +2,13 @@ import React from 'react';
 
 import styles from './ImageGalleryItem.module.css';
 
-const ImageGalleryItem = ({ keys, url, fullUrl, isModalOpen }) => {
+const ImageGalleryItem = ({ id, url, fullurl }) => {
   return (
-    <li className={styles.ImageGalleryItem} key={keys}>
+    <li className={styles.ImageGalleryItem} key={id}>
       <img
-        src={!isModalOpen ? url : fullUrl}
-        alt=""
+        id={id}
+        src={url}
+        alt={fullurl}
         className={styles.ImageGalleryItem_image}
       />
     </li>

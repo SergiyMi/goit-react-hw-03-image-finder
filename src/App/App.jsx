@@ -1,11 +1,10 @@
-import React, { Component, createRef } from 'react';
+import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import styles from './App.module.css';
 import Modal from '../Modal/Modal';
 import ImageGallery from '../ImageGallery/ImageGallery';
-import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 import Searchbar from '../Searchbar/Searchbar';
 import Loadder from '../Loader/Loader';
 import * as imagesApi from '../services/imagesApi';
@@ -19,11 +18,10 @@ export default class App extends Component {
     isModalOpen: false,
     isLoading: false,
     error: null,
-    pageNumber: 1,
+    pageNumber: 0,
     query: '',
+    imageUrl: '',
   };
-
-  // imageRef = createRef();
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
@@ -46,11 +44,14 @@ export default class App extends Component {
     imagesApi
       .fetchImages(this.state.query, this.state.pageNumber)
       .then(picture => {
-        console.log(picture);
         this.setState(state => ({
           images: [...state.images, ...picture],
           pageNumber: state.pageNumber + 1,
         }));
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth',
+        });
       })
       .catch(error => {
         this.setState({
@@ -74,13 +75,14 @@ export default class App extends Component {
     });
 
   handleImageRefClick = e => {
-    const { current } = this.imageRef;
-    if (current && e.target === current)
-      this.setState({ isModalOpen: !this.state.isModalOpen });
+    this.setState({
+      isModalOpen: !this.state.isModalOpen,
+      imageUrl: e.target.alt,
+    });
   };
 
   render() {
-    const { isModalOpen, images, isLoading, error } = this.state;
+    const { isModalOpen, images, isLoading, error, imageUrl } = this.state;
     return (
       <div className={styles.App}>
         <Searchbar onSearch={this.onSearch} />
@@ -94,17 +96,13 @@ export default class App extends Component {
             timeout={3000}
           />
         )}
-        {images.length > 0 && <ImageGallery images={images} />}
-        {isModalOpen && (
-          <Modal onClose={this.closeModal}>
-            <ImageGalleryItem
-              isModalOpen={isModalOpen}
-              ref={this.imageRef}
-              onClick={this.handleImageRefClick}
-            />
-          </Modal>
+        {images.length > 0 && (
+          <ImageGallery images={images} onClickes={this.handleImageRefClick} />
         )}
-        {/* {images.length > 0 && <Button onClick={this.fetchImages} />} */}
+        {imageUrl && isModalOpen && (
+          <Modal onClose={this.closeModal} url={imageUrl} />
+        )}
+        {images.length > 0 && <Button onClickes={this.fetchImages} />}
       </div>
     );
   }
